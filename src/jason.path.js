@@ -57,7 +57,7 @@ JasonPath.prototype.trace = function jasonPath_trace(expr, val, path) {
             this.trace(x, val[loc], path + ";" + loc);
         else if (loc === "*") {
             this.walk(loc, x, val, path, function(m, l, x, v, p) {
-                this.trace(m + ";" + x, v, p);
+                jasonPath.trace(m + ";" + x, v, p);
             });
         } else if (loc === "..") {
             this.trace(x, val, path);
