@@ -1,4 +1,4 @@
-describe("jsonPath original tests", function() {
+describe("jasonPath dupe tests", function() {
     it("JASON can reproduce example 1 results", function() {
         var jasonPath = new JasonPath("$..author"),
             result = jasonPath.query(testJsonObject),
