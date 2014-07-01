@@ -1,20 +1,28 @@
 function JasonPath(path) {
     this.path = path || this.path;
     this.queryMethod = this.buildQuery(this.path);
-    this.lastResult = [];
 }
 JasonPath.prototype.path = "";
 JasonPath.prototype.normalizedPath = "";
-JasonPath.prototype.lastMode = null;
+JasonPath.prototype.currentMode = null;
+JasonPath.prototype.currentResult = null;
 JasonPath.prototype.queryObjects = function jasonPath_queryObjects(object) {
-    this.lastMode = "VALUE";
+    this.currentMode = "VALUE";
+    this.currentResult = [];
     this.trace(this.normalizedPath.replace(/^\$;/, ""), object, "$");
-    return this.lastResult;
+    var result = this.currentResult;
+    delete this.currentResult;
+    delete this.currentMode;
+    return result;
 };
 JasonPath.prototype.queryPaths = function jasonPath_queryPaths(object) {
-    this.lastMode = "PATH";
+    this.currentMode = "PATH";
+    this.currentResult = [];
     this.trace(this.normalizedPath.replace(/^\$;/, ""), object, "$");
-    return this.lastResult;
+    var result = this.currentResult;
+    delete this.currentResult;
+    delete this.currentMode;
+    return result;
 };
 JasonPath.prototype.query = function jasonPath_query(object, returnAsPaths) {
     if (!returnAsPaths) {
@@ -68,8 +76,9 @@ JasonPath.prototype.trace = function jasonPath_trace(expr, val, path) {
         } else if (/^(-?[0-9]*):(-?[0-9]*):?([0-9]*)$/.test(loc)) { // [start:end:step]  phyton slice syntax
             this.slice(loc, x, val, path);
         }
-    } else
+    } else {
         this.store(path, val);
+    }
 };
 
 JasonPath.prototype.walk = function jasonPath_walk(loc, expr, val, path, f) {
@@ -110,14 +119,14 @@ JasonPath.prototype.asPath = function(path) {
 };
 JasonPath.prototype.eval = function jasonPath_eval(x, _v, _vname) {
     try {
-        return $ && _v && eval(x.replace(/@/g, "_v"));
+        return _v && eval(x.replace(/@/g, "_v"));
     } catch (e) {
         throw new SyntaxError("jsonPath: " + e.message + ": " + x.replace(/@/g, "_v").replace(/\^/g, "_a"));
     }
 };
 JasonPath.prototype.store = function(p, v) {
     if (p) {
-        this.lastResult.push(this.lastMode == "PATH" ? this.asPath(p) : v);
+        this.currentResult.push(this.currentMode == "PATH" ? this.asPath(p) : v);
     }
     return !!p;
 };
