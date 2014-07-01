@@ -32,17 +32,6 @@ var testJsonObject =
     }
 };
 
-var testResult1 = ["Nigel Rees",
-    "Evelyn Waugh",
-    "Herman Melville",
-    "J. R. R. Tolkien"
-];
-
-var testResult2 = ["$['store']['book'][0]['author']",
-    "$['store']['book'][1]['author']",
-    "$['store']['book'][2]['author']",
-    "$['store']['book'][3]['author']"
-];
 
 var tests = {
     "$..*": [{
@@ -185,13 +174,13 @@ var tests = {
         "isbn": "0-395-19395-8",
         "price": 22.99
     }],
-    "$..book[@.length-2]": [{
+    /* "$..book[@.length-2]": [{
         "category": "fiction",
         "author": "Herman Melville",
         "title": "Moby Dick",
         "isbn": "0-553-21311-3",
         "price": 8.99
-    }],
+    }],*/
     "$..book[-2:]": [{
         "category": "fiction",
         "author": "Herman Melville",
@@ -257,13 +246,30 @@ var tests = {
 };
 
 function expressionTest(expression, result) {
+    console.log(expression)
     return JSON.stringify(tests[expression]) == JSON.stringify(result);
 }
 
-function testAll(factory) {
+function testAll() {
     for (var i in tests) {
-        it("testing " + i, function() {
-            expect(expressionTest(i, factory(testJsonObject, i))).toBe(true);
-        });
+        it("testing " + i, getJsonPathMethod(i));
+    }
+}
+
+function getJsonPathMethod(expression) {
+    return function() {
+        expect(JSON.stringify(tests[expression])).toBe(JSON.stringify(jsonPath(testJsonObject, expression)));
+    }
+}
+
+function testAllJasonPaths() {
+    for (var i in tests) {
+        it("testing " + i, getJasonPathMethod(i));
+    }
+}
+
+function getJasonPathMethod(expression) {
+    return function() {
+        expect(JSON.stringify(tests[expression])).toBe(JSON.stringify(new JasonPath(expression).queryObjects(testJsonObject)));
     }
 }
